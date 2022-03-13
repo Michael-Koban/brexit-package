@@ -1,183 +1,11 @@
-import requests
-import os
-import json
-import pandas as pd
-import csv , datetime, unicodedata, time, datetime, tweeterid #dateutil.parserm, 
-
-
-class TwitterCrawler():
-    """Summary of class here.
-
-    You must define a TwitterCrawler instance to start crawling Twitter Data.
-    Longer class information....
-
-    Attributes:
-        likes_spam: A boolean indicating if we like SPAM or not.
-        eggs: An integer count of the eggs we have laid.
-    """ 
-     
-    def __init__(self, bearer_token: str):
-        """Inits SampleClass with blah."""
-        self.bearer_token = bearer_token
-        os.environ['TOKEN'] = self.bearer_token
-        self.headers = {"Authorization": "Bearer {}".format(self.bearer_token)}
-
-    def auth():
-     return os.getenv('TOKEN')
-
-    # def create_headers(self):
-    #     """ Creates a header for the Twitter API request,
-    #      based on the Bearer Token
-
-    #     Parameters
-    #     ----------
-    #     sound : str, optional
-    #         The sound the animal makes (default is None)
-
-    #     Raises
-    #     ------
-    #     NotImplementedError
-    #         If no sound is set for the animal or passed in as a
-    #         parameter.
-    #     """
-
-    #     headers = {"Authorization": "Bearer {}".format(self.bearer_token)}
-    #     return headers
-
-    def __connect_to_endpoint(self, url: str, params: dict, next_token: str  = None, sleep_time:int = 3, verbose:bool = False):
-            params['next_token'] = next_token   #params object received from create_url function
-
-            for i in range(10):
-
-                response = requests.request("GET", url, headers = self.headers, params = params)
-                if verbose: print(f"Trail #{i} Response Code: " + str(response.status_code))
-
-                if response.status_code == 200: return response.json()
-                
-                if response.status_code == 429:
-                    if verbose: print(f"Try sleeping for {sleep_time} seconds")
-                    time.sleep(sleep_time)
-
-            raise Exception(response.status_code, response.text)
-
-    # def __connect_to_endpoint(self, url: str, params: dict, next_token = None, verbose = True):
-    #     """ Connect to Twitter API via a endpoint
-
-    #     Parameters
-    #     ----------
-    #     sound : str, optional
-    #         The sound the animal makes (default is None)
-
-    #     Raises
-    #     ------
-    #     NotImplementedError
-    #         If no sound is set for the animal or passed in as a
-    #         parameter.
-    #     """
-    #     params['next_token'] = next_token   #params object received from create_url function
-    #     response = requests.request("GET", url, headers = self.headers, params = params)
-    #     if verbose == True:
-    #         print("Endpoint Response Code: " + str(response.status_code))
-    
-    #     if response.status_code == 429:
-    #         print(response.text)
-    #         print("try sleeping for 2 seconds")
-    #         time.sleep(2)
-    #         return response.status_code
-
-    #     if response.status_code != 200:
-    #         raise Exception(response.status_code, response.text)
-    #     return response.json()
-    
-    def get_url_by_tweet_id(tweet_id: str):
-        """ Connect to Twitter API via a endpoint
-
-        Parameters
-        ----------
-        sound : str, optional
-            The sound the animal makes (default is None)
-
-        Raises
-        ------
-        NotImplementedError
-            If no sound is set for the animal or passed in as a
-            parameter.
-        """
-        return "https://twitter.com/anyuser/status/" + str(tweet_id)
-
-    def search_by_tweet_id(self, tweet_id: str):
-        """ search url for idtweet - App rate limit: 
-        300 requests per 15-minute window shared among all users of your app
-        User rate limit (OAuth 1.0a): 900 requests per 15-minute window per each authenticated user
-
-
-        Parameters
-        ----------
-        sound : str, optional
-            The sound the animal makes (default is None)
-
-        Raises
-        ------
-        NotImplementedError
-            If no sound is set for the animal or passed in as a
-            parameter.
-        """
-    
-        search_url = "https://api.twitter.com/2/tweets/:id"
-        search_url = search_url.replace(":id", tweet_id)
-        #change params based on the endpoint you are using
-        query_params = {
-                        'expansions': 'author_id,in_reply_to_user_id,geo.place_id',
-                        'tweet.fields': 'id,text,author_id,in_reply_to_user_id,geo,conversation_id,created_at,lang,public_metrics,referenced_tweets,reply_settings,source',
-                        'user.fields': 'id,name,username,created_at,description,public_metrics,verified',
-                        'place.fields': 'full_name,id,country,country_code,geo,name,place_type',
-                        'next_token': {}}
-        json_response = self.__connect_to_endpoint(url = search_url, params = query_params)
-        return json_response
-
-    def search_recent_by_keyword(self, keyword: str, start_date, end_date, max_results = 10):
-        """ search url for idtweet - App rate limit: 
-        300 requests per 15-minute window shared among all users of your app
-        User rate limit (OAuth 1.0a): 900 requests per 15-minute window per each authenticated user
-         ONLY FROM LAST WEEK !@#!@#!@#!@#@#!@#!@#!@
-
-        Parameters
-        ----------
-        sound : str, optional
-            The sound the animal makes (default is None)
-
-        Raises
-        ------
-        NotImplementedError
-            If no sound is set for the animal or passed in as a
-            parameter.
-        """
-        search_url = "https://api.twitter.com/2/tweets/search/recent" 
-
-        #change params based on the endpoint you are using
-        query_params = {'query': keyword,
-                        'start_time': start_date,
-                        'end_time': end_date,
-                        'max_results': max_results,
-                        'expansions': 'author_id,in_reply_to_user_id,geo.place_id',
-                        'tweet.fields': 'id,text,author_id,in_reply_to_user_id,geo,conversation_id,created_at,lang,public_metrics,referenced_tweets,reply_settings,source',
-                        'user.fields': 'id,name,username,created_at,description,public_metrics,verified',
-                        'place.fields': 'full_name,id,country,country_code,geo,name,place_type',
-                        'next_token': {}}
-
-        json_response = self.__connect_to_endpoint(url= search_url, params = query_params)
-        return json_response 
-    
-###self.__connect_to_endpoint2(self, search_url, query_params, next_token = next_token, verbose = False)
-    
-
-
-    def return_tweets_of_key_opinion_leader(self, query="", user_name=None,
+def return_tweets_of_key_opinion_leader(self, query="", user_name=None,
                                         start_time = "2015-12-7T00:00:00Z",
                                         end_time = "2021-12-26T00:00:00Z",
                                         max_results = 10, evaluate_last_token = False,
                                         limit_amount_of_returned_tweets = 10000000,
                                        verbose_10 = False):
+        import os
+
   
         search_url = "https://api.twitter.com/2/tweets/search/all" #endpoint use to collect data from
 
@@ -244,7 +72,9 @@ class TwitterCrawler():
             now = datetime.now()
             current_time = now.strftime("%H:%M:%S (Date: %d.%m.%y)")
             current_time = "Current Time: " + current_time + "   *****************************************   "
-            f.write(current_time+ '\n\n')
+            f.write(current_time)
+            f.write('\n')
+            f.write('\n')
             
         ##########################################################################################
 
@@ -281,8 +111,32 @@ class TwitterCrawler():
                         'place.fields': 'full_name,id,country,country_code,geo,name,place_type',
                         'next_token': {next_token}}
             
-            json_response = self.__connect_to_endpoint(url = search_url,params= query_params, next_token = next_token)
+            json_response = self.__connect_to_endpoint2(url = search_url,params= query_params, next_token = next_token, verbose = False)
             
+            if json_response == 429:
+                time.sleep(10)
+                json_response = self.__connect_to_endpoint2(url = search_url,params= query_params, next_token = next_token, verbose = False)
+                # if json_response == 429:
+                #     print("sleep 10 seconds") #need to sleep for 15 minutes")
+                #     time.sleep(10)
+                #     json_response = self.__connect_to_endpoint(self,url = search_url, query_params, next_token = next_token, verbose = False)
+                #     if json_response == 429:
+                #         print("sleep 30 seconds") #need to sleep for 15 minutes")
+                #         time.sleep(30)
+                #         json_response = self.__connect_to_endpoint(self,s earch_url, query_params, next_token = next_token, verbose = False)
+                #         if json_response == 429:
+                #             print("sleep 60 seconds") #need to sleep for 15 minutes")
+                #             time.sleep(60)
+                #             json_response = self.__connect_to_endpoint(self,search_url, query_params, next_token = next_token, verbose = False)
+                #             if json_response == 429:
+                #                 print("sleep 15 Minutes") #need to sleep for 15 minutes")
+                #                 time.sleep(15*60)
+                #                 json_response = self.__connect_to_endpoint(self,search_url, query_params, next_token = next_token, verbose = False)
+                #                 if json_response == 429:
+                #                     print("sleep 15 Minutes") #need to sleep for 15 minutes")
+                #                     time.sleep(15*60)
+                #                     json_response = self.__connect_to_endpoint(self,search_url, query_params, next_token = next_token, verbose = False)
+
             json_response_list.append(json_response) #the first json_response itme
             num_of_returned_tweets += json_response["meta"]["result_count"]
 
@@ -365,8 +219,4 @@ class TwitterCrawler():
             json.dump(json_response_list, outfile)
         return json_response_list, num_of_returned_tweets, next_tokens
 
- #The following cose check wheter the user_name is a list, if not it turnes it into a list
-        if type(user_name) != list:
-            name = user_name
-            user_name = []
-            user_name.append(name)
+ 
