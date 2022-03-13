@@ -172,7 +172,7 @@ class TwitterCrawler():
     
 
 
-    def return_tweets_of_key_opinion_leader(self, query="", user_name=None,
+    def __return_tweets_of_key_opinion_leader(self, query="", user_name=None,
                                         start_time = "2015-12-7T00:00:00Z",
                                         end_time = "2021-12-26T00:00:00Z",
                                         max_results = 10, evaluate_last_token = False,
@@ -366,7 +366,41 @@ class TwitterCrawler():
         return json_response_list, num_of_returned_tweets, next_tokens
 
  #The following cose check wheter the user_name is a list, if not it turnes it into a list
-        if type(user_name) != list:
-            name = user_name
-            user_name = []
-            user_name.append(name)
+      
+    def return_tweets_of_key_opinion_leaders(self, query="", dir_name="tweets", user_names =None, \
+        start_time = "2015-12-7T00:00:00Z", end_time = "2021-12-26T00:00:00Z",
+        max_results = 10, evaluate_last_token = False, \
+            limit_amount_of_returned_tweets = 10000000, verbose_10 = False):
+            if type(user_names) != list:
+                user_names = [user_names]
+            users_json_response_lists = []
+            names_evaluated = []
+            names_didnt_evaluated = []
+            next_tokens_users= [] #this will include a list where eachelement is a list containing all the tokens off the specific user
+            for name in user_names:
+                print("bringing tweets of", name)
+                query = ""
+                user_name = name
+                try:
+
+                    json_response_list, num_of_returned_tweets,next_tokens = self.__return_tweets_of_key_opinion_leader(query=query, user_name=user_name,
+                                                            start_time = start_time,
+                                                            end_time = end_time,
+                                                            max_results = max_results,
+                                                            limit_amount_of_returned_tweets = limit_amount_of_returned_tweets,
+                                                                                                                verbose_10 = True)
+                    print(num_of_returned_tweets)
+                    if num_of_returned_tweets > 0:
+                        names_evaluated.append(name)
+                        next_tokens_users.append(next_tokens)
+                
+
+                    else:
+                        names_didnt_evaluated.append(name)
+                        print("The user:", name, "had", num_of_returned_tweets, "tweets!!")
+
+                    print("---------------------------------------------------------------")
+                except:
+                    print("There was a problem with the key opinion leader:", name)
+                    names_didnt_evaluated.append(name)
+                    print("*************************************************************************************")
